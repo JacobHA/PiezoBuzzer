@@ -1,0 +1,130 @@
+# Circuit from GPIO7
+
+# based on https://raspberrypi.stackexchange.com/questions/30170/piezo-with-python
+# 30 Dec 2018
+
+import RPi.GPIO as GPIO
+import time
+
+buzzer_num = 7 # Set to the appropriate GPIO pin. Run 'pinout' on RPi terminal for help.
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(buzzer_num, GPIO.OUT)
+
+# As taken from pages.mtu.edu/~suits/notefreqs.html :
+# Encouraged to add more (flats/sharps, more octaves, or general function)
+
+c = 261.63
+d = 293.66
+e = 329.63
+f = 349.23
+g = 392
+a = 440
+b = 493.88
+C_hi = 523.25
+
+# r = 'Rest', no sound
+r = 1
+
+# Initialize the buzzer: 
+# We use pulse-width modulation like you would see in LED brightness configuration
+p = GPIO.PWM(buzzer_num, 100)
+
+
+# based on the frequencies above, we define callable functions which will return a changeFrequency event.
+def C():
+    return p.ChangeFrequency(c)
+def D():
+    return p.ChangeFrequency(d) 
+def E():
+    return p.ChangeFrequency(e)
+def F():
+    return p.ChangeFrequency(f)
+def G():
+    return p.ChangeFrequency(g)
+def A():
+    return p.ChangeFrequency(a)
+def B():
+    return p.ChangeFrequency(b)
+def C2():
+    return p.ChangeFrequency(C_hi)
+def R():
+    return p.ChangeFrequency(r)
+
+# Given a frequency, we would like to define a note to translate from string 'A' played for a certain amount of time.
+
+def note(value, timer):
+
+    # Not the most pythonic way... improvements welcome:
+  
+    if value == 'C':
+        time.sleep(timer)
+        C()
+        time.sleep(timer)
+
+    elif value == 'D':
+        time.sleep(timer)
+        D()
+        time.sleep(timer)
+
+    elif value == 'E':
+        time.sleep(timer)
+        E()
+        time.sleep(timer)
+
+    elif value == 'F':
+        time.sleep(timer)
+        F()
+        time.sleep(timer)
+
+    elif value == 'G':
+        time.sleep(timer)
+        G()
+        time.sleep(timer)
+
+    elif value == 'A':
+        time.sleep(timer)
+        A()
+        time.sleep(timer)
+
+    elif value == 'B':
+        time.sleep(timer)
+        B()
+        time.sleep(timer)
+
+    elif value == 'C2':
+        time.sleep(timer)
+        C2()
+        time.sleep(timer)
+
+    elif value == 'R':
+        time.sleep(timer)
+        R()
+        time.sleep(timer)
+        
+# Example, with constant note length (as seen in Play function):
+Cscale = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C2']
+
+tune = ['C', 'R', 'C', 'R', 'C', 'G', 'E', 'C']
+
+def Play(numTimes, speed):  # Play our tune/scale numTimes with given speed
+    for i in range(0,numTimes):
+        print("Iteration: " + str(i+1))
+        time.sleep(speed) # Wait
+        p.start(100)            # start the PWM on 100  percent duty cycle
+        p.ChangeDutyCycle(90)   # change the duty cycle to 90%
+        
+        # Set up our scale:
+        for key in Cscale + Cscale[::-1] + 2*Cscale[0:1]:
+            # Play:
+            note(key, speed/2)
+        # Stop the buzzer: (see object p above)
+        p.stop()                # stop the PWM output
+
+    print("Done, cleaning up.") # When loop is complete, clean the GPIO pins.
+    GPIO.cleanup()
+
+iterations = 1
+speed = 0.6
+
+Play(iterations, speed)
